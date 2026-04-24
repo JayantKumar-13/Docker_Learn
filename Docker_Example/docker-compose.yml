@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  docker-db:               #Name of service
+    image: postgres:latest
+    container_name: docker-db      #Name of container
+#    ports:
+#      - "5432:5432"
+    environment:
+      POSTGRES_DB: example-db              #Name of DB
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "0000"
+    volumes:
+      - example-db-data:/var/lib/postgresql/data
+    networks:
+      - myNetwork
+
+  Docker-example:
+    image: jayant1303/docker-example
+    container_name: docker-example
+    ports:
+      - "8080:8080"
+    networks:
+      - myNetwork
+    depends_on:
+      - docker-db
+
+volumes:
+  example-db-data:
+
+networks:
+  myNetwork:

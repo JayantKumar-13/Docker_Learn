@@ -1,0 +1,78 @@
+version: "3.8"
+
+services:
+  order-db:
+    image: postgres
+    container_name: order-db
+    environment:
+      - POSTGRES_DB=order-db
+      - POSTGRES_USER=jayant
+      - POSTGRES_PASSWORD=0000
+    networks:
+      - ecommerce-network
+    volumes:
+      - order-db-data:/var/lib/postgresql/data
+
+  inventory-db:
+    image: postgres
+    container_name: inventory-db
+    environment:
+      - POSTGRES_DB=inventory-db
+      - POSTGRES_USER=jayant
+      - POSTGRES_PASSWORD=0000
+    networks:
+      - ecommerce-network
+    volumes:
+      - inventory-db:/var/lib/postgresql/data
+
+  discovery-service:
+    image: jayant1303/discovery-service
+    container_name: discovery-service
+    networks:
+      - ecommerce-network
+
+  config-server:
+    image: jayant1303/config-server
+    container_name: config-server
+    networks:
+      - ecommerce-network
+    depends_on:
+      - discovery-service
+
+  inventory-service:
+    image: jayant1303/inventory-service
+    container_name: inventory-service
+    networks:
+      - ecommerce-network
+    depends_on:
+      - config-server
+      - inventory-db
+
+  order-service:
+    image: jayant1303/order-service
+    container_name: order-service
+    networks:
+      - ecommerce-network
+    depends_on:
+      - config-server
+      - order-db
+
+  api-gateway:
+    image: jayant1303/api-gateway
+    container_name: api-gateway
+    networks:
+      - ecommerce-network
+    depends_on:
+      - inventory-service
+      - order-service
+    ports:
+      - "8080:8080"
+
+#WE only added ports mapping to api gateway so that no 3rd person can directly talk to services. Api gateway is going to talk to service
+
+volumes:
+  order-db-data:
+  inventory-db:
+
+networks:
+  ecommerce-network:
